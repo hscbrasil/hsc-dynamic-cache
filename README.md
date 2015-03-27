@@ -1,0 +1,1 @@
+# hsc-dynamic-cache
