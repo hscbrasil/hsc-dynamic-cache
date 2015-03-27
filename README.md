@@ -1,6 +1,25 @@
 # hsc-dynamic-cache
 
-## Squid Configuration
+*Squid StoreID helper with sample patterns and YouTube support.*
+
+## Requirements
+
+* Perl
+* Squid >= 3.5
+* squidGuard or equivalent `url_rewrite_program`
+
+## Installation
+
+```bash
+# cp hsc-dynamic-cache /usr/local/bin/
+# cp hsc-dynamic-cache-db.txt /usr/local/etc/
+# chmod 755 /usr/local/bin/hsc-dynamic-cache
+# chown root.squid /usr/local/bin/hsc-dynamic-cache
+# chmod 644 /usr/local/etc/hsc-dynamic-cache-db.txt
+# chown root.squid /usr/local/etc/hsc-dynamic-cache-db.txt
+```
+
+### Squid Configuration
 
 ```
 url_rewrite_program /usr/bin/squidGuard
@@ -31,7 +50,7 @@ store_id_access deny all
 refresh_pattern -i squid\.internal	10080	80%	79900 override-lastmod override-expire ignore-reload ignore-no-store ignore-must-revalidate ignore-private ignore-auth
 ```
 
-## squidGuard Configuration
+### squidGuard Configuration
 
 ```
 rewrite yt {
