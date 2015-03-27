@@ -1,0 +1,126 @@
+# IMDb
+^http:\/\/video\-http\.media\-imdb\.com\/.*\.mp4\?.*
+sub {
+	if ($url =~ /.*\.com\/(.*)\?(.*)/) {
+		$ret = "http://imdbv.squid.internal/$1";
+	}
+}
+# Sourceforge
+^http:\/\/[a-zA-Z0-9\-\_\.]+\.dl\.sourceforge\.net\/.*
+sub {
+	if ($url =~ /^http:\/\/.*\.dl\.sourceforge\.net\/(.*)/) {
+		$ret = "http://dl.sourceforge.net.squid.internal/$1";
+	}
+}
+# Dailymotion
+^http:\/\/.*(?:vid.*\..*\.dmcdn\.net|proxy\-[\d]+\..*dailymotion\.com)\/.*\/(frag.*\.(?:mp4|flv))
+sub {
+	$ret = "http://dmv.squid.internal/$1";
+}
+# R7
+^http:\/\/vod\.streaming\.r7\.com\/.*\/.*\/(.*\.mp4\/.*)
+sub {
+	$ret = "http://r7.squid.internal/$1";
+}
+# Metacafe
+^http:\/\/vl\.mccont\.com\/ItemFiles\/(.*\.mp4)
+sub {
+	$ret = "http://metacafe.squid.internal/$1";
+}
+# MSN
+^http:\/\/prod\.video\.msn\.com\/tenant\/amp\/entityid\/.*blob\=1.*
+sub {
+	if ($url =~ /.*\.com\/tenant\/amp\/entityid\/(.*)\?(.*)/) {
+		$ret = "http://msnv.squid.internal/$1";
+	}
+}
+# MSN
+^http:\/\/msavideo\-a\.akamaihd\.net\/.*\/house\-static\/(.*\.mp4)
+sub {
+	$ret = "http://msnv.squid.internal/static/$1";
+}
+# Terra
+^http:\/\/(pd\-vdp\-cdn[\d]+\-.*\.com)\/(terratv\/[0-9]+\.mp4)?.*
+sub {
+	$ret = "http://terratv.squid.internal/$2";
+}
+# Globo
+^http:\/\/voddownload[\d]+\.globo\.com\/(.*\.mp4)?.*
+sub {
+	$ret = "http://globotv.squid.internal/$1";
+}
+# Facebook
+^https?:\/\/(fbcdn|scontent).*(akamaihd|fbcdn)\.net\/.*\/v\/.*\/(.*\.mp4)
+sub {
+	$ret = "http://facebook.squid.internal/$3";
+}
+# Facebook
+^https?:\/\/fbcdn\-(static|profile)\-a\.akamaihd\.net\/static\-ak\/rsrc\.php\/((?!.*\.(?:js|css|swf)).*)$
+sub {
+	$ret = "http://facebook.squid.internal/static/$2";
+}
+# Facebook
+^https?:\/\/(fbcdn|scontent).*(akamaihd|fbcdn)\.net\/(h|s)(profile|photos).*\/(.*\.(png|gif|jpg))(\?.+)?$
+sub {
+	$ret = "http://facebook.squid.internal/$5";
+}
+# Facebook
+^https?:\/\/fbstatic\-a\.akamaihd\.net\/rsrc\.php\/((?!.*\.(?:js|css|swf)).*)$
+sub {
+	$ret = "http://facebook.squid.internal/static/$1";
+}
+# Youtube
+^https?:\/\/[a-zA-Z0-9\-\_\.]+\.googlevideo\.com\/videoplayback.*
+sub {
+	my $getid = sub {
+		my $p = shift;
+		if ($p =~ m/(v\=[a-zA-Z0-9\-\_]+)/) {
+			return $1;
+		}
+		elsif ($p =~ m/\/v\/([a-zA-Z0-9\-\_]+)\?/) {
+			return "v=$1";
+		}
+	};
+	my $getitag = sub {
+		my $p = shift;
+		if ($p =~ m/(itag\=[0-9\-\_]+)/) {
+			return $1;
+		}
+	};
+	my $getmime = sub {
+		my $p = shift;
+		if ($p =~ m/(mime\=[a-zA-Z0-9\%]+)/) {
+			return $1;
+		}
+	};
+	my $getrange = sub {
+		my $p = shift;
+		if ($p =~ m/(range\=[0-9\-]+)/) {
+			return $1;
+		}
+	};
+	my $getredirect = sub {
+		my $p = shift;
+		if ($p =~ m/(redirect\=)([a-zA-Z0-9\-\_]+)/) {
+			return $1 . time();
+		}
+	};
+	my $id = $getid->($request[6]);
+	my $itag = $getitag->($url);
+	my $mime = $getmime->($url);
+	my $range = $getrange->($url);
+	my $redirect = $getredirect->($url);
+	if ($id) {
+		my $vid = $id;
+		$vid .= "&" . $itag if $itag;
+		$vid .= "&" . $mime if $mime;
+		$vid .= "&" . $range if $range;
+		$vid .= "&" . $redirect if $redirect;
+		$ret = "http://youtube.squid.internal/$vid";
+	}
+}
+# Google Maps
+^https?:\/\/(khms|mt)[\d]+\.google\.[a-z\.]+\/(.*)
+sub {
+	$ret = "http://googlemaps$1.squid.internal/$2";
+}

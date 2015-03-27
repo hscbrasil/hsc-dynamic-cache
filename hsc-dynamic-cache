@@ -1,0 +1,126 @@
+#! /usr/bin/env perl
+#
+# ***** BEGIN LICENSE BLOCK *****
+# Written by William Lima <william.lima@hscbrasil.com.br> based on the
+# StoreID helper codes which were released by Eliezer Croitoru at
+# https://github.com/elico/squid-helpers.
+#
+# Copyright (C) 2015 High Security Center Brasil, Ltd.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# ***** END LICENSE BLOCK *****
+#
+
+use strict;
+no strict 'subs';
+use warnings;
+use Getopt::Long;
+use Sys::Syslog qw(:standard :macros);
+use File::Basename qw(basename);
+use subs 'log';
+
+$|++;
+
+my $debug = 0;
+my $dbase = "hsc-dynamic-cache-db.txt";
+my $encoding = ":encoding(UTF-8)";
+my %patterns = ();
+
+sub usage {
+	my $tool = basename($0);
+	print STDERR <<_EOF;
+Usage: $tool -h[elp] | [-d[ebug]] [-file <filename>]
+_EOF
+	exit(1);
+}
+
+sub initialize {
+	my $handle = undef;
+	my $is_regex = 1;
+	my ($key, $value);
+	open($handle, "< $encoding", $dbase)
+		|| die "$0: can't open $dbase for reading: $!";
+	while (<$handle>) {
+		chomp;
+		next if /^#/;
+		if ($is_regex) {
+			$key = $_;
+			$is_regex = 0;
+		} elsif (/^sub {$/) {
+			$value = $_;
+		} elsif (/^}$/) {
+			$value .= $_;
+			$patterns{qr/$key/} = $value;
+			$is_regex = 1;
+		} else { $value .= $_ }
+	}
+	if ($!) {
+		die "unexpected error while reading from $dbase: $!";
+	}
+	close($handle)
+		|| die "couldn't close $dbase: $!";
+}
+
+sub rewriter {
+	my @request = @{$_[0]};
+	my ($url, $ret) = ($request[0], "");
+	foreach my $pat (keys %patterns) {
+		if (/$pat/) {
+			eval($patterns{$pat})->();
+			last;
+		}
+	}
+	return $ret;
+}
+
+sub log {
+	my $message = shift;
+	return unless defined $message;
+	syslog(LOG_ERR, $message);
+}
+
+sub noconc {
+	my @request = split;
+	my $url = "ERR";
+	if (@request) {
+		log("original request [$_].") if $debug;
+		my $result = rewriter(\@request);
+		if (length($result)) {
+			$url = "OK store-id=" . $result;
+		}
+		log("modified response [$url].") if $debug;
+	} else {
+		log("original request [had a problem].") if $debug;
+		log("modified response [$url].") if $debug;
+	}
+	print "$url\n";
+}
+
+sub main {
+	openlog(basename($0), "pid", LOG_USER);
+	log("Started");
+	LINE: while (<>) {
+		chomp;
+		last LINE if /^(exit|quit|x|q).*/;
+		noconc($_);
+	}
+}
+
+GetOptions("help|h" => sub { usage() },
+	   "file=s" => \$dbase,
+	   "debug|d" => \$debug);
+initialize();
+main();
+closelog();
