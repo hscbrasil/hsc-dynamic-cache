@@ -30,6 +30,9 @@ Here is the list of patterns included:
 # chown root.squid /usr/local/bin/hsc-dynamic-cache
 # chmod 644 /usr/local/etc/hsc-dynamic-cache-db.txt
 # chown root.squid /usr/local/etc/hsc-dynamic-cache-db.txt
+# cp extras/simplerewrite /usr/local/bin/
+# chmod 755 /usr/local/bin/simplerewrite
+# chown root.squid /usr/local/bin/simplerewrite
 ```
 
 ## Dynamic caching
@@ -39,7 +42,8 @@ Here is the list of patterns included:
 Dynamic caching is enabled by setting the following configuration parameters in the squid.conf file:
 
 ```
-url_rewrite_program /usr/bin/squidGuard
+#url_rewrite_program /usr/bin/squidGuard
+url_rewrite_program /usr/local/bin/simplerewrite
 
 acl rewritedoms dstdomain .dailymotion.com .video-http.media-imdb.com .dl.sourceforge.net .prod.video.msn.com .fbcdn.net .akamaihd.net vl.mccont.com .mais.uol.com.br .streaming.r7.com
 acl yt url_regex -i googlevideo.*videoplayback
@@ -69,9 +73,11 @@ refresh_pattern -i squid\.internal	10080	80%	79900 override-lastmod override-exp
 
 ## YouTube caching
 
+There is no additional step required when using our `simplerewrite` custom helper.
+
 ### squidGuard Configuration
 
-YouTube caching can be enabled separately by setting the following configuration parameters in the squidGuard.conf file:
+YouTube caching can also be enabled by setting the following configuration parameters in the squidGuard.conf file:
 
 ```
 logdir /var/log/squidGuard
