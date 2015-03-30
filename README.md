@@ -1,12 +1,25 @@
-# hsc-dynamic-cache
+# HSC Dynamic Cache
 
-*Squid StoreID helper with sample patterns and YouTube support.*
+*HSC Dynamic Cache delivers ready-to-use Squid-3.5 "Store ID" helper. To improve the cache keys, there is an URL patterns file which can be customized by the user.*
+
+Here is the list of patterns included:
+
+* IMDb trailers
+* Sourceforge downloads
+* R7 vídeos
+* Metacafe
+* MSN videos
+* Terra TV
+* Globo vídeos
+* Facebook
+* YouTube (HTML5 only)
+* Google Maps
 
 ## Requirements
 
 * Perl
 * Squid >= 3.5
-* squidGuard or equivalent `url_rewrite_program`
+* squidGuard or equivalent `url_rewrite_program` (optional)
 
 ## Installation
 
@@ -19,7 +32,11 @@
 # chown root.squid /usr/local/etc/hsc-dynamic-cache-db.txt
 ```
 
+## Dynamic caching
+
 ### Squid Configuration
+
+Dynamic caching is enabled by setting the following configuration parameters in the squid.conf file:
 
 ```
 url_rewrite_program /usr/bin/squidGuard
@@ -50,11 +67,18 @@ store_id_access deny all
 refresh_pattern -i squid\.internal	10080	80%	79900 override-lastmod override-expire ignore-reload ignore-no-store ignore-must-revalidate ignore-private ignore-auth
 ```
 
+## YouTube caching
+
 ### squidGuard Configuration
 
+YouTube caching can be enabled separately by setting the following configuration parameters in the squidGuard.conf file:
+
 ```
+logdir /var/log/squidGuard
+
 rewrite yt {
 	s@(https://.*youtube.com/watch\?v=.*)@\1\&html5=1@i
+	s@(https://.*youtube.com/v/.*)@\1\&html5=1@i
 }
 
 acl {
