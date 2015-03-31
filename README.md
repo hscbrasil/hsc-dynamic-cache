@@ -12,7 +12,7 @@ Here is the list of patterns included:
 * Terra TV
 * Globo vídeos
 * Facebook
-* YouTube (HTML5 only)
+* YouTube
 * Google Maps
 
 ## Requirements
