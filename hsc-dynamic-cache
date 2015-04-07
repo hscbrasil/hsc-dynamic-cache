@@ -1,8 +1,7 @@
 #! /usr/bin/env perl
 #
 # ***** BEGIN LICENSE BLOCK *****
-# Written by William Lima <william.lima@hscbrasil.com.br> based on the
-# StoreID helper codes which were released by Eliezer Croitoru at
+# Based on the StoreID helper codes which were released by Eliezer Croitoru at
 # https://github.com/elico/squid-helpers.
 #
 # Copyright (C) 2015 High Security Center Brasil, Ltd.
