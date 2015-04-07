@@ -8,7 +8,7 @@ $|++;
 while (<>) {
 	chomp;
 	my @X = split;
-	my $ret = "ERR"
+	my $ret = "ERR";
 	if (@X) {
 		my $url = $X[0];
 		if (($url =~ m/(https:\/\/.*youtube\.com\/watch\?v=.*)/) ||
