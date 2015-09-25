@@ -101,8 +101,8 @@ sub {
 	};
 	my $getredirect = sub {
 		my $p = shift;
-		if ($p =~ m/(redirect\=)([a-zA-Z0-9\-\_]+)/) {
-			return $1 . time();
+		if ($p =~ m/(redirect_counter\=\d+)/) {
+			return $1;
 		}
 	};
 	my $id = $getid->($request[6]);
